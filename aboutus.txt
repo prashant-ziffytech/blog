@@ -1,6 +1,268 @@
+Controller:-
+<?php
 
-Hello
+class Control extends CI_Controller {
 
-jaishri
+public function __construct()
+	{
+		parent::__construct();
+		$this->load->model('Models');
+	}
 
-Good morning
+	public function index()
+	{
+		$this->load->view('views');
+	}
+
+	public function dispdata()
+	{
+	$result['data']=$this->Models->displayrecords();
+	$this->load->view('nextview',$result);
+	}
+
+	public function create()
+	{	
+		$author_name = $this->input->post('author_name');
+		$author_mno = $this->input->post('author_mno');
+	
+		$data = array('author_name' => $author_name,
+			'author_mno' => $author_mno
+		);
+		$insert = $this->Models->createData($data);
+		 echo $insert;	
+	}
+
+	public function deletedata($id)
+	{
+	$this->Models->deleterecords($id);
+	redirect("Control/dispdata");
+	}
+
+	public function updatedata($id)
+	{
+	$result['data']=$this->Models->displayrecordsById($id);
+	$this->load->view('updateview',$result);	
+	
+		if($this->input->post('update'))
+		{
+		$n=$this->input->post('author_name');
+		$e=$this->input->post('author_mno');
+		$this->Models->updaterecords($n,$e,$id);
+		redirect("Control/dispdata");
+		}
+	}	
+	public function user_status()
+	{
+		$id=$this->input->post('id');
+		$status=$this->input->post('status');
+		$this->Models->user_records_status($id,$status);
+	}
+}
+?>
+
+
+
+//Model:-
+
+<?php 
+class Models extends CI_Model
+{
+	public function createData($data)
+	{
+		$author_name = $data['author_name'];
+		$author_mno = $data['author_mno'];
+		
+		$arraUser = array(
+			"author_name"=>$author_name,
+			"author_mno"=>$author_mno
+		);
+		
+		$this->db->insert("authordata",$arraUser);
+		$id = $this->db->insert_id();
+		return $id;
+
+	}
+	function displayrecords()
+	{
+	$query=$this->db->query("select * from authordata");
+	return $query->result();
+	}
+
+	function deleterecords($id)
+	{
+	$this->db->query("delete  from authordata where user_id='".$id."'");
+	}
+	
+	function displayrecordsById($id)
+	{
+		echo $id;
+	$query=$this->db->query("select * from authordata where user_id='".$id."'");
+	return $query->result();
+	}
+	
+	function updaterecords($author_name,$author_mno,$id)
+	{
+	$query=$this->db->query("update authordata SET author_name='$author_name',author_mno='$author_mno' where user_id='".$id."'");
+	}	
+	function user_records_status($id,$status)
+	{
+		$data = array(
+			'status' => $status
+		);
+		$this->db->where('user_id',$id);
+		$this->db->update('authordata',$data);
+
+	}
+}            
+
+
+View:- The 1st view means the MainView
+
+<html>
+<head>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+	</head>
+<script>
+	$(document).ready(function(){
+
+		$("#btn").click(function() {
+
+			$.ajax({
+		            url: "<?php echo base_url().'Control/create'; ?>",
+		            data: $("#FormLogin").serialize(),
+		            type: "post",
+		            success: function(response){
+		                $('#FormLogin')[0].reset();
+		                alert('Successfully inserted');
+		                window.location.href="<?php echo base_url('Control/dispdata');?>"
+		              }
+		      	});	
+          });
+		});
+	</script>
+<body>  
+<form method="post" action="" form id="FormLogin" name="registartion-form"  enctype="multipart/form_data">
+	
+	
+<center>	<table width="400" height="200" border="2" bgcolor="lightgrey">
+		  <h1>Information Page</h1>
+		  <tr>
+		  <th>Author_name:</th>
+          <td><input type="text" name="author_name"></td>
+          </tr>
+          <tr>
+          <th>Author_mno:</th>
+          <td><input type="text" name="author_mno"></td>
+          </tr>
+          <tr>
+  <td align="center"><Button type="button" name="login" id="btn" value="login" >login</Button></td>
+</tr>
+</center>
+</table>
+</form>
+</body>
+</html>
+
+
+//View:- For Update View 
+
+<html>
+<head>
+<title>Registration form</title>
+</head>
+
+<body>
+ <?php
+  $i=1;
+  foreach($data as $row)
+  {
+  ?>
+	<form method="post">
+		<table width="600" border="1" cellspacing="5" cellpadding="5">
+  <tr>
+    <td width="230">Enter Your Name </td>
+    <td width="329"><input type="text" name="author_name" value="<?php echo $row->author_name; ?>"/></td>
+  </tr>
+  <tr>
+    <td>Enter Your Mobileno </td>
+    <td><input type="text" name="author_mno" value="<?php echo $row->author_mno; ?>"/></td>
+  </tr>
+  <tr>
+    <td colspan="2" align="center">
+	<input type="submit" name="update" value="Update Records"/></td>
+  </tr>
+</table>
+	</form>
+	<?php } ?>
+</body>
+</html>
+
+
+//view:-Update,Status,display View name nextview
+
+<!DOCTYPE html>
+<html>
+<head>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+</head>
+
+<body>
+<title>Display Records</title>
+<table width="600" border="1" bgcolor="lightgrey"cellspacing="5" cellpadding="5">
+  <tr style="background:#CCC">
+    <th>Sr No</th>
+    <th>Author_name</th>
+    <th>Author_mno</th>
+	<th>Delete</th>
+	<th>Update</th>
+   <th>Status</th>
+  </tr>
+  <?php
+  $i=1;
+  foreach($data as $row)
+  {
+  echo "<tr>";
+  echo "<td>".$i."</td>";
+  echo "<td>".$row->author_name."</td>";
+  echo "<td>".$row->author_mno."</td>";
+  
+  echo "<td><a href='deletedata/".$row->user_id."'>Delete</a></td>";
+ echo "<td><a href='updatedata/".$row->user_id."'>Update</a></td>";
+  echo "<td><a class='status_checks' data-status =".$row->status." data-id=".$row->user_id." >";
+if($row->status =='1'){ echo 'Deactive';}else{
+    echo 'Active';
+  }
+echo "</a></td>";
+  echo "</tr>";
+  $i++;
+  }
+   ?>
+</table>
+</body>
+<script type="text/javascript">
+  $(document).on('click','.status_checks',function()
+  {
+
+   var status = $(this).attr("data-status");
+   var id = $(this).attr("data-id");
+   var name  = $(this).text();
+   alert(name);
+
+   status = (status == 1 ? 0 : 1);
+    var msg =(status=='0')? 'Activate' : 'Deactivate';
+
+    if(confirm("Are you sure to"+ msg))
+    {
+      url="<?php echo base_url().'Control/user_status'?>";
+      $.ajax({
+        type:"POST",
+        url:url,
+        data:{"id":id,"status":status},
+        success:function(data){
+          location.reload();
+        }
+      });
+    }
+  });
+</script>
+</html>
