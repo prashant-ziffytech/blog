@@ -4,10 +4,10 @@ Database:-table name:-tag_table
 
 CREATE TABLE `tag_table` (
   `author_id` int(11) NOT NULL AUTO_INCREMENT,
-  `author_name` varchar(50) DEFAULT NULL,
+  `author_name` varchar(255) DEFAULT NULL,
   `created_at` timestamp DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
-  status enum(4) '0','1' ,
+  status enum('0','1'),
   PRIMARY KEY (`id`));
 
 Controller:- Authors_Controller.php
