@@ -1,1 +1,321 @@
 Bootstrap modal,ajax,jquery,curd,in codeigniter 
+
+Database:-table name:-tag_table
+
+CREATE TABLE `tag_table` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `author_name` varchar(50) DEFAULT NULL,
+  `created_at` timestamp DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  status enum(4) '0','1' ,
+  PRIMARY KEY (`id`));
+
+Controller:- Authors_Controller.php
+<?php
+class Authors_Controller extends CI_Controller 
+{
+	
+	function __construct()
+	{
+		parent::__construct();
+		$this->load->model('Authors_models');
+	}
+	public function Addtag()
+	{
+		$data=array(
+			'author_name'=> $this->input->post('tag')
+		);
+		$insert=$this->Authors_models->Addrecords($data);
+		echo ($insert);
+	}
+	public function display_data()
+	{
+		$result['data']=$this->Authors_models->displayrecords();
+		$this->load->view('Authors_view',$result);
+	}
+	public function updatedata()
+	{
+	 		/*echo "<pre>";
+			print_r($_POST);die();*/
+		$data=array(
+			'author_name'=> $this->input->post('tag'),
+			"author_id"  => $this->input->post("author_id")
+		);
+		$update=$this->Authors_models->updaterecords($data);
+		echo ($update);
+	}
+
+	/* Jaishri 29/02/2020
+	*  Get Tag information
+	*/
+	public function getTagData(){
+		$result 	=	$this->Authors_models->getTagData();
+		echo json_encode($result);
+	}
+
+	public function user_status()
+	{
+
+		$id=$this->input->post('id');
+		$status=$this->input->post('status');
+		$this->Authors_models->user_records($id,$status);
+	}
+
+}
+?>
+
+//Model:-Authors_models.php
+
+<?php
+class Authors_models extends CI_Model
+{
+	function Addrecords($data)
+	{
+		$this->db->insert('tag_table',$data);
+	}
+	public function displayrecords()
+	{
+		$query=$this->db->query("select * from tag_table");
+		return $query->result();
+	}
+	public function getTagData(){
+		$author_id 	=	$this->input->post("author_id");
+
+		$this->db->select("*");
+		$this->db->from("tag_table");
+		$this->db->where("author_id",$author_id);
+		$resTag 	=	$this->db->get();
+
+		$rowTag =	$resTag->row();
+		return $rowTag;
+	}
+	function updaterecords($data)
+	{
+		$upd_data 	=	array(
+							"author_name" => $data['author_name']
+							);
+		$author_id 	=	$data['author_id'];
+		$this->db->where('author_id',$author_id);
+		$this->db->update('tag_table', $upd_data);
+	}
+	function user_records($id,$status)
+	{
+		$data = array(
+			'status' => $status
+		);
+		$this->db->where('author_id',$id);
+		$this->db->update('tag_table',$data);
+	}
+}
+?>
+
+//View:-
+Name it Authors_view.php
+
+<!DOCTYPE html>
+<html>
+<head>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.min.js"></script>  
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" /> 
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>  
+</head>
+<body>
+  <center><h1>Author Listing(Management)</h1></center>
+  <div class="table-responsive">
+    <div align="center">
+     <button type="button" name="add" id="add" data-toggle="modal" data-target="#add_data_Modal" class="btn btn-info">Add Author Info</button>
+    </div></br>
+	<form action="" method="POST">
+  <table align="center" width="600" border="2" cellspacing="2" cellpadding="2" bgcolor="#e6ffe6">
+      <tr>
+        <th>Sr no</th>
+        <th>Author Name</th>
+        <th>Update</th>
+        <th>Status</th>
+      </tr>
+<?php
+$i=1;
+foreach ($data as $row) 
+{
+  	echo "<tr>";
+  	echo "<td>".$i."</td>";
+  	echo "<td>".$row->author_name."</td>";
+  	echo "<td><a data-toggle='modal' data-id=".$row->author_id." class='update-tag btn btn-success' '>Update</a></td>";
+  	echo "<td><a class='status_check' data-status =".$row->status." data-id=".$row->author_id." >";
+    if($row->status =='1')
+        {
+          echo 'Deactive';
+        }
+        else
+        {
+          echo 'Active';
+        }  
+	"</a></td>";
+	echo "</tr>";
+	$i++;
+}
+?>
+</table>
+</form>
+</div>
+</body>
+ <div id="add_data_Modal" class="modal fade">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal"></button>
+      <h4 class="modal-title">Add Author</h4>
+      </div>
+    <div class="modal-body">
+    <form method="post" id="createForm" name="createForm" action="<?php echo base_url('Authors_Controller/Addtag'); ?>">
+      <label>Author Name</label>
+        <input type="text" name="tag" id="name" class="form-control" />
+      <br/>
+    </div>
+    <div class="modal-footer">
+      <!-- <input type="submit" name="Add" id="Add" value="Add" class="btn btn-primary" /> -->
+      <input type="button" id="modalAddTag" name="Add" value="Add"  class="btn btn-primary" />
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+   </div>
+   </form>
+  </div>
+ </div>
+</div>
+  <script type="text/javascript">
+    $(document).ready(function(){
+    $(document).on("click","#modalAddTag",function(){
+      console.log($("#createForm").serialize());
+      $.ajax({
+                url        :    "<?php echo base_url('Authors_Controller/Addtag'); ?>",
+                data       :    $("#createForm").serialize(),
+                type       :    "POST",
+                success    :    function(response)
+                {
+                    $('#createModal').modal('hide');
+                    $('#createForm')[0].reset();
+                    alert('Successfully inserted');
+                    location.reload();
+                },
+               error      :    function()
+               {
+                //alert("error");
+               }
+          });
+    });
+ $("#Add").submit(function(event) {
+      event.preventDefault();
+      $.ajax({
+                url        :    "<?php echo base_url('Authors_Controller/Addtag'); ?>",
+                data       :    $("#createForm").serialize(),
+                type       :    "POST",
+                success    :    function(response)
+                {
+                    $('#createModal').modal('hide');
+                    $('#createForm')[0].reset();
+                    alert('Successfully inserted');
+                    location.reload();
+                },
+               error      :    function()
+               {
+                //alert("error");
+               }
+          });
+    });
+  });
+  </script>
+ <div id="update_data_Modal" class="modal fade">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal"></button>
+      <h4 class="modal-title">update Tag</h4>
+      </div>
+    <div class="modal-body">
+    <form method="post" id="update" name="updateForm" action="<?php echo base_url('Authors_Controller/updatedata'); ?>">
+      <label>Author Name</label>
+        <input type="text" name="tag" id="tag" class="form-control" />
+        <input type="hidden" name="author_id" id="author_id" />
+      <br/>
+    </div>
+    <div class="modal-footer">
+      <input type="button" id="modalupdateTag" name="update" value="update"  class="btn btn-primary"/>
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+   </div>
+   </form>
+  </div>
+ </div>
+</div>
+  <script type="text/javascript">
+    $(document).ready(function(){
+
+    // From listing view, on update-tag class click get its attribute value into variable then show update popup modal.
+    // then call function getTagDetails to get tag existing information from the data base.
+
+    $(document).on("click",".update-tag",function(){
+       $("#update_data_Modal").modal("show");
+       var author_id =   $(this).attr("data-id");
+       $("#update_data_Modal #author_id").val(author_id);
+       getTagDetails(author_id);
+    })
+
+    // When function get call then create ajax call and get information from database.
+    // and result get in json, to show result into modal form parse json and shows to input element.
+    function getTagDetails(author_id){
+        $.ajax({
+                url        :    "<?php echo base_url('Authors_Controller/getTagData'); ?>",
+                data       :    {author_id:author_id},
+                type       :    "POST",
+                success    :    function(response)
+                {
+                  // Parse result json to access each array element.
+                    var res   = JSON.parse(response);
+                    // after parsing json show tag_name data base value to form input element.  
+                    $("#update_data_Modal #tag").val(res.author_name);
+                }               
+          });
+    }
+    $(document).on("click","#modalupdateTag",function(){
+      $.ajax({
+                url        :    "<?php echo base_url('Authors_Controller/updatedata'); ?>",
+                data       :    $("#update").serialize(),
+                type       :    "POST",
+                success    :    function(response)
+                {
+                    $('#createModal').modal('hide');
+                    $('#update')[0].reset();
+                    alert('Successfully updated');
+                    window.location.reload();  
+                },
+               error      :    function()
+               {
+                //alert("error");
+               }
+               
+          });
+    });
+  });
+  </script>
+<script type="text/javascript">
+$(document).on('click','.status_check',function()
+{
+        var status       =    $(this).attr("data-status");
+        var id           =    $(this).attr("data-id");
+        status           =    (status == 1 ? 0 : 1);
+        var msg          =    (status =='0')? 'Deactive' : 'Active';
+        if(confirm("Are you sure to "+ msg))
+          {
+            url          =    "<?php echo base_url('Authors_Controller/').'user_status'; ?>";
+            $.ajax({
+            type         :    "POST",
+            url          :    url,
+            data         :    {"id":id,"status":status},
+            success      :    function(data) {
+            location.reload();
+          } 
+     });        
+}
+});
+</script>
+</table>
+</form>
+</html>
