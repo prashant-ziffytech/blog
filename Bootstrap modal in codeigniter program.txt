@@ -46,7 +46,7 @@ class Authors_Controller extends CI_Controller
 	}
 
 	/* Jaishri 29/02/2020
-	*  Get Tag information
+	*  Get Author information
 	*/
 	public function getTagData(){
 		$result 	=	$this->Authors_models->getTagData();
