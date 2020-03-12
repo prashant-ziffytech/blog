@@ -1,3 +1,21 @@
+Simple Dropdown program in codeigniter 
+
+Database:-Table name
+myblog,category,authortable,blogtag
+
+CREATE TABLE `myblog` ( 
+    `id` int(11) NOT NULL AUTO_INCREMENT, 
+    `blog_title` varchar(200) DEFAULT NULL, 
+    `description` varchar(200) DEFAULT NULL, 
+    `created_at` timestamp NOT NULL, 
+    `updated_at` timestamp NOT NULL, 
+'status' enum('0','1') NOT NULL,
+'category' varchar(100) DEFAULT NULL,
+'author' varchar(100) DEFAULT NULL,
+'tag' varchar(100) DEFAULT NULL,
+    PRIMARY KEY (`id`));
+
+
 <?php
 class Blog_controller extends CI_Controller 
 {
