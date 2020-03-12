@@ -30,6 +30,8 @@ CREATE TABLE `blogtag` (
 `tag_name` varchar(200) DEFAULT NULL, 
 PRIMARY KEY (`id`));
 
+Insert into category values(1,"Food");
+Insert into category values(2,"Vegetables");
 
 <?php
 class Blog_controller extends CI_Controller 
