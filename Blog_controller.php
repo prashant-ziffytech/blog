@@ -25,6 +25,11 @@ CREATE TABLE `authortable` (
 `author_name` varchar(200) DEFAULT NULL, 
 PRIMARY KEY (`id`));
 
+CREATE TABLE `blogtag` ( 
+ `tag_id` int(11) NOT NULL AUTO_INCREMENT, 
+`tag_name` varchar(200) DEFAULT NULL, 
+PRIMARY KEY (`id`));
+
 
 <?php
 class Blog_controller extends CI_Controller 
