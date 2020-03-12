@@ -15,6 +15,11 @@ CREATE TABLE `myblog` (
 'tag' varchar(100) DEFAULT NULL,
     PRIMARY KEY (`id`));
 
+CREATE TABLE `category` ( 
+ `category_id` int(11) NOT NULL AUTO_INCREMENT, 
+`category_name` varchar(200) DEFAULT NULL, 
+PRIMARY KEY (`id`));
+
 
 <?php
 class Blog_controller extends CI_Controller 
