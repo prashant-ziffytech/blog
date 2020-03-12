@@ -33,6 +33,12 @@ PRIMARY KEY (`id`));
 Insert into category values(1,"Food");
 Insert into category values(2,"Vegetables");
 
+Insert into authortable values(1,"jaishri");
+Insert into authortable values(2,"sayali");
+
+Insert into blogtag values(1,"Good Quality");
+Insert into blogtag values(2,"Good Product");
+
 <?php
 class Blog_controller extends CI_Controller 
 {
