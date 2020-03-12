@@ -20,6 +20,11 @@ CREATE TABLE `category` (
 `category_name` varchar(200) DEFAULT NULL, 
 PRIMARY KEY (`id`));
 
+CREATE TABLE `authortable` ( 
+ `author_id` int(11) NOT NULL AUTO_INCREMENT, 
+`author_name` varchar(200) DEFAULT NULL, 
+PRIMARY KEY (`id`));
+
 
 <?php
 class Blog_controller extends CI_Controller 
